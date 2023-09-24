@@ -1,0 +1,10 @@
+src/__pycache__/
+.idea/
+venv/
+__pycache__/
+downloads/
+src/browser/profile/
+screen/
+settings.py
+src/sessions/
+
