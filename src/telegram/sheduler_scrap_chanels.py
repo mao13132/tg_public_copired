@@ -31,8 +31,6 @@ class ShedulerScrapChanels:
 
         print(f'Успешно авторизовался в user bote')
 
-        res_clear = TgClearOldPosts(self.BotDB).start_clear_old_posts()
-
         posts_list = await TgModuleScrap(telegram_core, self.BotDB, self.path_dir_project).start_scrap_channels()
 
         print(f'Собрал {len(posts_list["posts"])} постов')

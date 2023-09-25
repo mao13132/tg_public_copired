@@ -21,6 +21,7 @@ class TgModuleScrap:
         self.BotDB = BotDB
         self.app = telegram_core.app
         self.path_dir_project = path_dir_project
+        self.black_list = ['http']
 
     async def get_id_chat(self, name_link):
         try:
@@ -71,6 +72,13 @@ class TgModuleScrap:
 
         return True
 
+    async def check_black_word(self, text):
+        for _bl_word in self.black_list:
+            if _bl_word in text:
+                return True
+
+        return False
+
     async def start_monitoring_chat(self, chat_id, link_chat):
 
         stop_title_list = []
@@ -84,6 +92,32 @@ class TgModuleScrap:
         async for message in self.app.get_chat_history(chat_id):
 
             date_post = message.date
+
+            test_msg = message.caption if message.text is None else message.text
+
+            if test_msg is None:
+                continue
+
+            check_black = await self.check_black_word(test_msg)
+
+            if check_black:
+                continue
+
+            count += 1
+
+            _title = get_title(test_msg)
+
+            # TODO проверка на ссылку
+            if _title in stop_title_list:
+                continue
+
+            stop_title_list.append(_title)
+
+            sql_res = self.BotDB.exist_message(chat_id, _title)
+
+            if sql_res:
+                # await self.delete_media(good_media_list)
+                continue
 
             one_post = {}
 
@@ -114,28 +148,13 @@ class TgModuleScrap:
             if not text_msg and good_media_list == []:
                 continue
 
-            if text_msg is None:
-                continue
-
-            _title = get_title(text_msg)
-
-            # TODO проверка на ссылку
-
-            stop_title_list.append(_title)
-
-            sql_res = self.BotDB.exist_message(chat_id, _title)
-
-            if sql_res:
-                await self.delete_media(good_media_list)
-                continue
-
             one_post['text'] = text_msg
             one_post['media'] = good_media_list
             one_post['source'] = link_chat
             one_post['chat_id'] = chat_id
             one_post['message_id'] = message.id
 
-            sql_res = self.BotDB.add_message(chat_id, message.id, _title, text_msg, link_chat)
+            sql_res = self.BotDB.add_message(chat_id, message.id, _title, text_msg, link_chat, date_post)
 
             for _media in good_media_list:
                 self.BotDB.save_media(message.id, _media, link_chat)
@@ -144,8 +163,6 @@ class TgModuleScrap:
 
             print(f'{datetime.now().strftime("%H:%M:%S")} #{count} '
                   f'Получаю сообщение ID: {message.id} от {date_post}')
-
-            count += 1
 
             if count > count_message_new_chat:
                 msg = f'Достиг лимит на сообщения в чате {link_chat}. Останавливаюсь'

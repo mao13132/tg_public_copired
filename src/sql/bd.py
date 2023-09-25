@@ -58,19 +58,17 @@ class BotDB:
 
         return True
 
-    def add_message(self, id_chat, message_id, title, text, source):
+    def add_message(self, id_chat, message_id, title, text, source, date_post):
 
         result = self.cursor.execute(f"SELECT * FROM posts WHERE id_chat='{id_chat}' AND title='{title}'")
 
         response = result.fetchall()
 
         if response == []:
-            now_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
             self.cursor.execute("INSERT OR IGNORE INTO posts ('id_chat', 'message_id', 'title', 'text', 'source', "
                                 "'date') VALUES (?,?,?,?,?,?)",
                                 (id_chat, message_id, title, text, source,
-                                 now_date,))
+                                 date_post,))
 
             self.conn.commit()
             return True
@@ -112,6 +110,30 @@ class BotDB:
         response = result.fetchall()
 
         return response
+
+    def get_list_media(self, message_id, source):
+
+        result = self.cursor.execute(f"SELECT * FROM media WHERE message_id='{message_id}' AND source='{source}'")
+
+        response = result.fetchall()
+
+        return response
+
+    def delete_media_from_pk(self, id_pk):
+
+        result = self.cursor.execute(f"DELETE FROM media WHERE id_pk = '{id_pk}'")
+
+        self.conn.commit()
+
+        return True
+
+    def delete_post(self, id_pk):
+
+        result = self.cursor.execute(f"DELETE FROM posts WHERE id_pk = '{id_pk}'")
+
+        self.conn.commit()
+
+        return True
 
     def close(self):
         # Закрытие соединения
