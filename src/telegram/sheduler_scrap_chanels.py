@@ -37,4 +37,6 @@ class ShedulerScrapChanels:
 
         res_clear = TgClearOldPosts(self.BotDB).start_clear_old_posts()
 
-        print()
+        print(f'Удалил {res_clear} старых постов из базы согласно настройкам MAX_POSTS_BASE')
+
+        return True

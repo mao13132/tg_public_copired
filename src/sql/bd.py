@@ -42,10 +42,10 @@ class BotDB:
         except Exception as es:
             print(f'SQL исключение check_table media {es}')
 
-    def exist_message(self, id_chat, title):
+    def exist_post(self, id_chat, title, date_post):
         try:
-            result = self.cursor.execute(f"SELECT * FROM posts WHERE id_chat='{id_chat}' AND title='{title}' "
-                                         f"AND active='1'")
+            result = self.cursor.execute(f"SELECT * FROM posts WHERE id_chat='{id_chat}' AND date='{date_post}' "
+                                         f"AND title='{title}' AND active='1'")
 
             response = result.fetchall()
 
@@ -130,6 +130,14 @@ class BotDB:
     def delete_post(self, id_pk):
 
         result = self.cursor.execute(f"DELETE FROM posts WHERE id_pk = '{id_pk}'")
+
+        self.conn.commit()
+
+        return True
+
+    def publisher_post(self, id_pk):
+
+        self.cursor.execute(f"UPDATE posts SET publish='1' WHERE id_pk = '{id_pk}'")
 
         self.conn.commit()
 

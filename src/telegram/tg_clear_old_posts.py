@@ -10,28 +10,29 @@ import os
 from datetime import datetime
 
 from settings import MAX_POSTS_BASE
+from src.telegram.delete_media import delete_media
 
 
 class TgClearOldPosts:
     def __init__(self, BotDB):
         self.BotDB = BotDB
 
-    def delete_media(self, list_media):
-
-        for _media in list_media:
-
-            id_pk = _media[0]
-
-            media_patch = _media[2]
-
-            try:
-                os.remove(media_patch)
-            except:
-                pass
-
-            self.BotDB.delete_media_from_pk(id_pk)
-
-        return True
+    # def delete_media(self, list_media):
+    #
+    #     for _media in list_media:
+    #
+    #         id_pk = _media[0]
+    #
+    #         media_patch = _media[2]
+    #
+    #         try:
+    #             os.remove(media_patch)
+    #         except:
+    #             pass
+    #
+    #         self.BotDB.delete_media_from_pk(id_pk)
+    #
+    #     return True
 
     def delete_sql_rows(self, posts_list):
 
@@ -51,20 +52,20 @@ class TgClearOldPosts:
 
             media_list = self.BotDB.get_list_media(msg_id, source)
 
-            res_del_media = self.delete_media(media_list)
+            res_del_media = delete_media(self.BotDB, media_list)
 
             self.BotDB.delete_post(id_pk)
 
-            print()
-
-        return True
+        return count_delete
 
     def start_clear_old_posts(self):
         count_posts = self.BotDB.get_count_posts()
 
+        count_deleted = 0
+
         if count_posts > MAX_POSTS_BASE:
             posts_list = self.BotDB.get_active_post()
 
-            res_clear = self.delete_sql_rows(posts_list)
+            count_deleted = self.delete_sql_rows(posts_list)
 
-        return True
+        return count_deleted

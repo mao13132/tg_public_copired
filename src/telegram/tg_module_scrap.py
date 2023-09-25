@@ -113,7 +113,7 @@ class TgModuleScrap:
 
             stop_title_list.append(_title)
 
-            sql_res = self.BotDB.exist_message(chat_id, _title)
+            sql_res = self.BotDB.exist_post(chat_id, _title, date_post)
 
             if sql_res:
                 # await self.delete_media(good_media_list)
